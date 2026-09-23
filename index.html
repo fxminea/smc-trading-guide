@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="km" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SMC Trading - Master Guide Web App</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          darkBg: '#080d1a',
+          darkCard: '#0f172a',
+          darkCardHover: '#1e293b',
+          borderDark: '#1e293b',
+          smcGreen: '#10b981',
+          smcRed: '#ef4444',
+          smcBlue: '#3b82f6',
+          smcYellow: '#f59e0b',
+          smcPurple: '#8b5cf6',
+          smcCyan: '#06b6d4',
+        },
+        fontFamily: {
+          khmer: ['Inter', 'Kantumruy Pro', 'Khmer OS Siemreap', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<!-- Google Font for Khmer & Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Lucide Icons CDN -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+  body {
+    font-family: 'Kantumruy Pro', 'Inter', sans-serif;
+    background-color: #080d1a;
+    color: #f1f5f9;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #080d1a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* SVG Responsiveness */
+  .chart-svg {
+    width: 100%;
+    height: auto;
+    max-height: 240px;
+  }
+
+  /* Active state glows */
+  .glow-green {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+  }
+  .glow-blue {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+  }
+</style>
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col antialiased selection:bg-smcGreen selection:text-black pb-20 md:pb-0">
+
+<!-- Header Navbar -->
+<header class="sticky top-0 z-40 bg-darkBg/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
+  <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+    <!-- Brand Title -->
+    <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTopic('ob')">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center font-bold text-slate-950 text-xl shadow-lg shadow-emerald-500/20">
+        ⚡
+      </div>
+      <div>
+        <h1 class="text-base font-bold leading-tight text-emerald-400 flex items-center gap-1.5">
+          SMC Master Guide
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-normal">PRO</span>
+        </h1>
+        <p class="text-[11px] text-slate-400">មេរៀនជួញដូរ Smart Money Concepts</p>
+      </div>
+    </div>
+
+    <!-- Search & Utility Actions -->
+    <div class="flex items-center gap-2">
+      <button onclick="toggleSearchModal()" class="flex items-center gap-2 bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-xl text-xs transition">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span class="hidden sm:inline">ស្វែងរកប្រធានបទ...</span>
+      </button>
+
+      <button onclick="toggleBookmarksModal()" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-amber-400 hover:bg-slate-800 relative" title="Saved Topics">
+        <i data-lucide="bookmark" class="w-4 h-4"></i>
+        <span id="bookmark-count-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-black text-[9px] font-bold rounded-full flex items-center justify-center">0</span>
+      </button>
+
+      <button onclick="switchTopic('tools')" class="p-2 bg-slate-900 border border-slate-800 rounded-xl text-emerald-400 hover:bg-slate-800 flex items-center gap-1 text-xs font-medium">
+        <i data-lucide="calculator" class="w-4 h-4"></i>
+        <span class="hidden md:inline">ឧបករណ៍</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Horizontal Category Slider -->
+<nav class="bg-slate-950 border-b border-slate-800/80 sticky top-[61px] z-30 px-3 py-2 overflow-x-auto no-scrollbar flex items-center gap-2">
+  <button id="nav-btn-ob" onclick="switchTopic('ob')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>① Order Block</span>
+  </button>
+  <button id="nav-btn-fvg" onclick="switchTopic('fvg')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>② Fair Value Gap</span>
+  </button>
+  <button id="nav-btn-liq" onclick="switchTopic('liq')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>③ Liquidity</span>
+  </button>
+  <button id="nav-btn-ms" onclick="switchTopic('ms')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>④ Market Structure</span>
+  </button>
+  <button id="nav-btn-pd" onclick="switchTopic('pd')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑤ Premium & Discount</span>
+  </button>
+  <button id="nav-btn-po3" onclick="switchTopic('po3')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑥ Power of 3</span>
+  </button>
+  <button id="nav-btn-kz" onclick="switchTopic('kz')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑦ Killzones</span>
+  </button>
+  <button id="nav-btn-judas" onclick="switchTopic('judas')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑧ Judas Swing</span>
+  </button>
+  <button id="nav-btn-silver" onclick="switchTopic('silver')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑨ Silver Bullet</span>
+  </button>
+  <button id="nav-btn-dol" onclick="switchTopic('dol')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑩ DOL</span>
+  </button>
+  <button id="nav-btn-smt" onclick="switchTopic('smt')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑪ SMT Divergence</span>
+  </button>
+  <button id="nav-btn-ipda" onclick="switchTopic('ipda')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑫ IPDA</span>
+  </button>
+  <button id="nav-btn-confluence" onclick="switchTopic('confluence')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑬ Confluence</span>
+  </button>
+  <button id="nav-btn-strategy" onclick="switchTopic('strategy')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑭ Strategy</span>
+  </button>
+  <button id="nav-btn-backtest" onclick="switchTopic('backtest')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑮ Backtesting</span>
+  </button>
+  <button id="nav-btn-journal" onclick="switchTopic('journal')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>⑯ Trade Journal</span>
+  </button>
+  <button id="nav-btn-road" onclick="switchTopic('road')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700 transition flex items-center gap-1.5">
+    <span>🗺 Roadmap</span>
+  </button>
+  <button id="nav-btn-tools" onclick="switchTopic('tools')" class="topic-nav-btn whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-700/50 bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/40 transition flex items-center gap-1.5">
+    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+    <span>🧮 SMC Interactive Tools</span>
+  </button>
+</nav>
+
+<!-- Main Container with Sidebar (Desktop) + Main Viewport -->
+<div class="max-w-7xl mx-auto flex-1 w-full flex gap-6 p-4 md:p-6">
+
+  <!-- Desktop Sidebar Navigation -->
+  <aside class="hidden lg:block w-64 shrink-0">
+    <div class="sticky top-[120px] bg-darkCard border border-borderDark rounded-2xl p-4 space-y-1 text-sm shadow-xl max-h-[calc(100vh-140px)] overflow-y-auto no-scrollbar">
+      <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">មេរៀន SMC ទាំង ១៦</div>
+      
+      <button onclick="switchTopic('ob')" id="side-ob" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">① Order Block</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('fvg')" id="side-fvg" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">② Fair Value Gap</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('liq')" id="side-liq" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">③ Liquidity</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('ms')" id="side-ms" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">④ Market Structure</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('pd')" id="side-pd" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑤ Premium & Discount</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('po3')" id="side-po3" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑥ Power of 3</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('kz')" id="side-kz" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑦ Killzones</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('judas')" id="side-judas" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑧ Judas Swing</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('silver')" id="side-silver" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑨ Silver Bullet</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('dol')" id="side-dol" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑩ Draw on Liquidity</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('smt')" id="side-smt" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑪ SMT Divergence</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('ipda')" id="side-ipda" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑫ IPDA</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('confluence')" id="side-confluence" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑬ Full Confluence</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('strategy')" id="side-strategy" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑭ Complete Strategy</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('backtest')" id="side-backtest" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑮ Backtesting</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('journal')" id="side-journal" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">⑯ Trade Journal</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <button onclick="switchTopic('road')" id="side-road" class="side-nav-item w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center justify-between">
+        <span class="truncate">🗺 Roadmap</span>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-500"></i>
+      </button>
+
+      <div class="pt-2 border-t border-slate-800 mt-3">
+        <button onclick="switchTopic('tools')" id="side-tools" class="side-nav-item w-full text-left px-3 py-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-emerald-400 font-medium hover:bg-emerald-900/40 transition flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <i data-lucide="calculator" class="w-4 h-4"></i> SMC Tools
+          </span>
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 min-w-0">
+
+    <!-- Top Banner & Action Header -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950/60 border border-slate-800 rounded-2xl p-5 mb-6 relative overflow-hidden shadow-lg">
+      <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="topic-badge-num" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Topic 1</span>
+            <span class="text-xs text-slate-400 font-medium">SMC Institutional Framework</span>
+          </div>
+          <h2 id="current-topic-title" class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            Order Block (OB)
+          </h2>
+          <p id="current-topic-subtitle" class="text-xs sm:text-sm text-slate-400 mt-1">
+            ទៀនចុងក្រោយដែលផ្ទុយទិស មុនពេលមានការផ្លាស់ទីដ៏ខ្លាំង
+          </p>
+        </div>
+
+        <!-- Bookmark Current Topic Button -->
+        <button id="bookmark-toggle-btn" onclick="toggleBookmarkCurrent()" class="self-start sm:self-center px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium transition flex items-center gap-2 shrink-0">
+          <i data-lucide="bookmark" class="w-4 h-4 text-amber-400" id="bookmark-icon"></i>
+          <span id="bookmark-btn-text">រក្សាទុកមេរៀន</span>
+        </button>
+      </div>
+
+      <!-- Level Tab Switcher (🟢 Beginner, 🔵 Intermediate, 🟣 Advanced) -->
+      <div id="level-tabs-container" class="mt-5 grid grid-cols-3 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800/80">
+        <button onclick="selectLevel('beginner')" id="tab-lvl-beginner" class="lvl-btn py-2 text-xs sm:text-sm font-semibold rounded-lg transition flex items-center justify-center gap-1.5 bg-emerald-950 text-emerald-400 border border-emerald-700/50 shadow">
+          <span>🟢 កម្រិតដំបូង</span>
+        </button>
+        <button onclick="selectLevel('intermediate')" id="tab-lvl-intermediate" class="lvl-btn py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+          <span>🔵 កម្រិតមធ្យម</span>
+        </button>
+        <button onclick="selectLevel('advanced')" id="tab-lvl-advanced" class="lvl-btn py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+          <span>🟣 កម្រិតខ្ពស់</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Dynamic Insertion -->
+    <div id="main-content-display" class="space-y-6">
+      <!-- Content populated dynamically via JavaScript -->
+    </div>
+
+  </main>
+</div>
+
+<!-- Search Modal -->
+<div id="search-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-start justify-center p-4 pt-16">
+  <div class="bg-darkCard border border-borderDark rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+    <div class="p-4 border-b border-slate-800 flex items-center gap-3">
+      <i data-lucide="search" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+      <input type="text" id="search-input" oninput="handleSearch()" placeholder="ស្វែងរកប្រធានបទ SMC (ឧ. FVG, Liquidity, Judas...)" class="bg-transparent text-sm w-full focus:outline-none text-white placeholder-slate-500">
+      <button onclick="toggleSearchModal()" class="text-slate-400 hover:text-white p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="search-results" class="p-3 overflow-y-auto space-y-2 flex-1">
+      <p class="text-xs text-slate-500 text-center py-8">បញ្ចូលពាក្យគន្លឹះដើម្បីស្វែងរកមេរៀន...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Bookmarks Modal -->
+<div id="bookmarks-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-darkCard border border-borderDark rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="bookmark" class="w-5 h-5 text-amber-400"></i>
+        <h3 class="font-bold text-white text-base">មេរៀនដែលបានរក្សាទុក</h3>
+      </div>
+      <button onclick="toggleBookmarksModal()" class="text-slate-400 hover:text-white p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div id="bookmarks-list" class="p-4 max-h-[60vh] overflow-y-auto space-y-2">
+      <!-- Populated via JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-darkBg/95 backdrop-blur-lg border-t border-slate-800 px-3 py-2 flex items-center justify-around">
+  <button onclick="switchTopic(currentTopicKey)" class="flex flex-col items-center text-slate-400 hover:text-emerald-400 transition text-[10px] gap-1">
+    <i data-lucide="book-open" class="w-5 h-5"></i>
+    <span>មេរៀន</span>
+  </button>
+  <button onclick="toggleSearchModal()" class="flex flex-col items-center text-slate-400 hover:text-emerald-400 transition text-[10px] gap-1">
+    <i data-lucide="search" class="w-5 h-5"></i>
+    <span>ស្វែងរក</span>
+  </button>
+  <button onclick="switchTopic('tools')" class="flex flex-col items-center text-emerald-400 font-bold transition text-[10px] gap-1">
+    <div class="w-9 h-9 -mt-5 rounded-full bg-emerald-500 text-black flex items-center justify-center shadow-lg shadow-emerald-500/30 border-2 border-darkBg">
+      <i data-lucide="calculator" class="w-5 h-5"></i>
+    </div>
+    <span>SMC Tools</span>
+  </button>
+  <button onclick="toggleBookmarksModal()" class="flex flex-col items-center text-slate-400 hover:text-amber-400 transition text-[10px] gap-1 relative">
+    <i data-lucide="bookmark" class="w-5 h-5"></i>
+    <span>កត់ចំណាំ</span>
+  </button>
+  <button onclick="switchTopic('road')" class="flex flex-col items-center text-slate-400 hover:text-indigo-400 transition text-[10px] gap-1">
+    <i data-lucide="map" class="w-5 h-5"></i>
+    <span>Roadmap</span>
+  </button>
+</div>
+
+<script>
+// Current state
+let currentTopicKey = 'ob';
+let currentLevel = 'beginner'; // 'beginner', 'intermediate', 'advanced'
+let savedBookmarks = JSON.parse(localStorage.getItem('smc_bookmarks') || '[]');
+let tradeLogs = JSON.parse(localStorage.getItem('smc_tradelogs') || '[]');
+
+// Complete Topics Database with Content & SVG Visualizations
+const smcTopicsData = {
+  ob: {
+    num: "①",
+    title: "Order Block (OB)",
+    subtitle: "ទៀនចុងក្រោយដែលផ្ទុយទិស មុនពេលមានការផ្លាស់ទីដ៏ខ្លាំង",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400 flex items-center gap-2">💡 គោលគំនិតស្នូល</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">
+          Order Block គឺជា <span class="text-emerald-400 font-semibold">ទៀនចុងក្រោយដែលផ្ទុយទិស</span> មុនពេលមានការផ្លាស់ទីដ៏ខ្លាំង។ វាតំណាងឱ្យតំបន់ដែលស្ថាប័ន (Smart Money) ទុកបញ្ជាដែលមិនទាន់បំពេញ។
+        </p>
+        <div class="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs leading-relaxed">
+          🏦 <strong>ស្ថាប័ន/ធនាគារ</strong> ដាក់បញ្ជាធំៗ មិនអាចបំពេញក្នុងពេលតែមួយបានទេ → បញ្ជាដែលនៅសល់នឹងទាញតម្លៃត្រឡប់មកតំបន់ OB ដើម្បីបំពេញបន្ថែម។
+        </div>
+      </div>
+
+      <!-- SVG Chart comparison -->
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">📌 Bullish OB vs Bearish OB</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Bullish OB Chart -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+            <svg class="chart-svg" viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="85" x2="35" y2="120" stroke="#ef4444" stroke-width="2"/>
+              <rect x="23" y="95" width="24" height="18" fill="#ef4444" opacity="0.7"/>
+              
+              <line x1="85" y1="100" x2="85" y2="145" stroke="#ef4444" stroke-width="2"/>
+              <rect x="73" y="110" width="24" height="25" fill="#ef4444" opacity="0.85"/>
+              
+              <!-- OB Box -->
+              <rect x="125" y="125" width="48" height="38" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,3"/>
+              <line x1="149" y1="130" x2="149" y2="163" stroke="#ef4444" stroke-width="2.5"/>
+              <rect x="137" y="138" width="24" height="20" fill="#ef4444"/>
+              <text x="149" y="180" font-size="12" fill="#f59e0b" text-anchor="middle" font-weight="bold">Bullish OB</text>
+              
+              <!-- Impulse Up -->
+              <line x1="210" y1="45" x2="210" y2="160" stroke="#10b981" stroke-width="2.5"/>
+              <rect x="198" y="55" width="24" height="95" fill="#10b981"/>
+              
+              <line x1="270" y1="25" x2="270" y2="60" stroke="#10b981" stroke-width="2"/>
+              <rect x="258" y="30" width="24" height="25" fill="#10b981"/>
+              
+              <line x1="325" y1="12" x2="325" y2="45" stroke="#10b981" stroke-width="2"/>
+              <rect x="313" y="18" width="24" height="22" fill="#10b981"/>
+            </svg>
+            <p class="text-xs text-center text-slate-400 mt-2">Bullish OB — ទៀនក្រហមចុងក្រោយ មុនការឡើងខ្លាំង</p>
+          </div>
+
+          <!-- Bearish OB Chart -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+            <svg class="chart-svg" viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="120" x2="35" y2="155" stroke="#10b981" stroke-width="2"/>
+              <rect x="23" y="130" width="24" height="18" fill="#10b981" opacity="0.7"/>
+              
+              <line x1="85" y1="95" x2="85" y2="140" stroke="#10b981" stroke-width="2"/>
+              <rect x="73" y="105" width="24" height="25" fill="#10b981" opacity="0.85"/>
+              
+              <!-- OB Box -->
+              <rect x="125" y="65" width="48" height="38" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,3"/>
+              <line x1="149" y1="70" x2="149" y2="103" stroke="#10b981" stroke-width="2.5"/>
+              <rect x="137" y="78" width="24" height="20" fill="#10b981"/>
+              <text x="149" y="55" font-size="12" fill="#f59e0b" text-anchor="middle" font-weight="bold">Bearish OB</text>
+
+              <!-- Impulse Down -->
+              <line x1="210" y1="75" x2="210" y2="175" stroke="#ef4444" stroke-width="2.5"/>
+              <rect x="198" y="85" width="24" height="80" fill="#ef4444"/>
+              
+              <line x1="270" y1="150" x2="270" y2="185" stroke="#ef4444" stroke-width="2"/>
+              <rect x="258" y="155" width="24" height="25" fill="#ef4444"/>
+            </svg>
+            <p class="text-xs text-center text-slate-400 mt-2">Bearish OB — ទៀនបៃតងចុងក្រោយ មុនការធ្លាក់ខ្លាំង</p>
+          </div>
+
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-sky-400">✂️ ការកែលម្អ OB (Refinement & CE Level)</h3>
+        <p class="text-slate-300 text-sm">ដើមឡើយ OB គិតទាំង Wick លើក្រោម។ ប៉ុន្តែដើម្បីទទួលបាន RRR ខ្ពស់បំផុត និងចំណុចចូលដ៏មុត គេប្រើ ២ វិធី៖</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <span class="text-xs font-bold text-teal-400 uppercase">វិធី A — Body Only</span>
+            <p class="text-xs text-slate-400 mt-1">គូសតែត្រឹម Body (Open ទៅ Close) ដោយមិនរាប់ Wick ដើម្បីបង្រួម SL ឱ្យតូច។</p>
+          </div>
+          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <span class="text-xs font-bold text-amber-400 uppercase">វិធី B — 50% CE Level</span>
+            <p class="text-xs text-slate-400 mt-1">Consequent Encroachment (50% midpoint) នៃ OB គឺជាកន្លែងដែលមានប្រតិកម្មខ្លាំងបំផុត។</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 mt-2">
+          <svg class="chart-svg" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+            <rect x="30" y="30" width="240" height="120" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+            <line x1="30" y1="30" x2="270" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="280" y="35" font-size="10" fill="#94a3b8">HIGH</text>
+            
+            <line x1="30" y1="90" x2="270" y2="90" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="5,3"/>
+            <text x="150" y="83" font-size="12" fill="#f59e0b" text-anchor="middle" font-weight="bold">CE 50% Level (Best Entry Target)</text>
+            
+            <line x1="30" y1="150" x2="270" y2="150" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="280" y="155" font-size="10" fill="#94a3b8">LOW</text>
+          </svg>
+        </div>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-purple-400">🏦 យន្តការពិតប្រាកដ និង Algo Delivery</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">
+          ស្ថាប័នហិរញ្ញវត្ថុមិនជួញដូរតាម Indicator ឬ Trendline ទេ។ Interbank Price Delivery Algorithm (IPDA) រចនាឡើងដើម្បីស្វែងរក Liquidity និង Rebalance កម្រិត Order Block។ 
+        </p>
+        <div class="p-4 rounded-xl bg-purple-950/40 border border-purple-800/50 text-purple-200 text-xs space-y-2">
+          <p>• <strong>Valid OB Requirements:</strong> ត្រូវតែបង្កើត Break of Structure (BOS) ឬ Change of Character (CHoCH) ស្អាត និងបន្សល់ទុក Fair Value Gap (FVG) នៅពីមុខវា។</p>
+          <p>• <strong>High Probability OB:</strong> OB ដែលស្ថិតនៅក្នុង Discount Zone (សម្រាប់ Buy) ឬ Premium Zone (សម្រាប់ Sell) + ត្រូវនឹង Killzone session។</p>
+        </div>
+      </div>
+    `
+  },
+
+  fvg: {
+    num: "②",
+    title: "Fair Value Gap (FVG)",
+    subtitle: "អតុល្យភាពដែលបន្សល់ដោយការផ្លាស់ទី 3 ទៀន — Imbalance",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">💡 តើ FVG ជាអ្វី?</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">
+          នៅពេលតម្លៃផ្លាស់ទី <span class="text-emerald-400 font-semibold">លឿនខ្លាំង (Impulse Move)</span> រហូតដល់រំលងតំបន់តម្លៃដោយគ្មានការជួញដូរពីរប្រភាគ — នោះគឺជា FVG ឬ Imbalance។
+        </p>
+        <div class="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs">
+          🚂 <strong>ឧបមា:</strong> រថភ្លើងចាកចេញលឿនពេក → អ្នកដំណើរខ្លះត្រូវបានទុកនៅក្រោយ → រថភ្លើងត្រូវតែត្រឡប់មកទទួលពួកគេ (តម្លៃត្រឡប់មក Fill FVG)។
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mt-2">
+          <svg class="chart-svg" viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="70" width="320" height="50" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-dasharray="3,3"/>
+            <text x="35" y="100" font-size="13" fill="#10b981" font-weight="bold">BULLISH FVG GAP</text>
+            
+            <!-- Candle 1 -->
+            <line x1="70" y1="120" x2="70" y2="180" stroke="#ef4444" stroke-width="2"/>
+            <rect x="58" y="130" width="24" height="40" fill="#ef4444"/>
+            <text x="70" y="195" font-size="10" fill="#94a3b8" text-anchor="middle">Candle 1</text>
+
+            <!-- Candle 2 (Impulse) -->
+            <line x1="180" y1="40" x2="180" y2="170" stroke="#10b981" stroke-width="2.5"/>
+            <rect x="168" y="50" width="24" height="110" fill="#10b981"/>
+            <text x="180" y="195" font-size="10" fill="#94a3b8" text-anchor="middle">Candle 2 (Impulse)</text>
+
+            <!-- Candle 3 -->
+            <line x1="290" y1="20" x2="290" y2="70" stroke="#10b981" stroke-width="2"/>
+            <rect x="278" y="25" width="24" height="35" fill="#10b981"/>
+            <text x="290" y="195" font-size="10" fill="#94a3b8" text-anchor="middle">Candle 3</text>
+          </svg>
+          <p class="text-xs text-center text-slate-400 mt-2">ចន្លោះរវាង Wick នៃ Candle 1 និង High/Low នៃ Candle 3 = FVG</p>
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-sky-400">🎯 CE Level នៃ FVG — Entry ប្រូបាបខ្ពស់</h3>
+        <p class="text-slate-300 text-sm">
+          ច្បាប់ចំណុចកណ្តាល 50% (Consequent Encroachment - CE) នៃ FVG គឺជាកន្លែងស្ថាប័នបំពេញភាគរយធំ។
+        </p>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
+          <p>• <strong>Partial Fill:</strong> តម្លៃប៉ះត្រឹមគែម FVG ហើយស្ទុះឡើង/ចុះវិញ។</p>
+          <p>• <strong>Full Fill (CE 50%):</strong> តម្លៃចូលជ្រៅដល់ 50% FVG → ផ្តល់ Risk:Reward ប្រសើរបំផុត!</p>
+          <p>• <strong>Inversion FVG:</strong> ប្រសិនបើ FVG ត្រូវគេធ្លាយឆ្លងកាត់ → វាប្រែជាតំបន់ Support/Resistance ផ្ទុយវិញ។</p>
+        </div>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-purple-400">🏦 BISI vs SIBI (ICT Terminology)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-slate-950 rounded-xl border border-emerald-900/50">
+            <span class="font-bold text-emerald-400 block mb-1">BISI (Buyside Imbalance Sellside Inefficiency)</span>
+            កើតឡើងពេលតម្លៃស្ទុះឡើងខ្លាំង → មានតែ Buy orders គ្មាន Sell orders។
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl border border-rose-900/50">
+            <span class="font-bold text-rose-400 block mb-1">SIBI (Sellside Imbalance Buyside Inefficiency)</span>
+            កើតឡើងពេលតម្លៃធ្លាក់ចុះខ្លាំង → មានតែ Sell orders គ្មាន Buy orders។
+          </div>
+        </div>
+      </div>
+    `
+  },
+
+  liq: {
+    num: "③",
+    title: "Liquidity — Stop Hunts",
+    subtitle: "កន្លែងដែល Stop Loss របស់ Retail traders ស្ថិតនៅ",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">💡 តើ Liquidity ជាអ្វី?</h3>
+        <p class="text-slate-300 text-sm">
+          Liquidity គឺជាលុយ ឬ Stop Loss របស់ Retail Traders។ Smart Money ត្រូវការប្រមូល Stop Loss ទាំងនោះ ដើម្បីបំពេញ Order ដ៏ធំរបស់ពួកគេ។
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3.5 bg-emerald-950/30 border border-emerald-800/50 rounded-xl">
+            <span class="font-bold text-emerald-400 text-xs block mb-1">📈 Buy-Side Liquidity (BSL)</span>
+            <p class="text-xs text-slate-300">ស្ថិតនៅ <strong>ខាងលើ Highs</strong> (Equal Highs, Swing Highs) = Stop Loss របស់អ្នក Sell + Buy Stop Orders។</p>
+          </div>
+          <div class="p-3.5 bg-rose-950/30 border border-rose-800/50 rounded-xl">
+            <span class="font-bold text-rose-400 text-xs block mb-1">📉 Sell-Side Liquidity (SSL)</span>
+            <p class="text-xs text-slate-300">ស្ថិតនៅ <strong>ខាងក្រោម Lows</strong> (Equal Lows, Swing Lows) = Stop Loss របស់អ្នក Buy + Sell Stop Orders។</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
+          <svg class="chart-svg" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="50" x2="380" y2="50" stroke="#f59e0b" stroke-dasharray="4,4" stroke-width="1.5"/>
+            <text x="30" y="42" fill="#f59e0b" font-size="11" font-weight="bold">Equal Highs (BSL Liquidity Pool $$$)</text>
+
+            <polyline points="30,130 90,55 150,110 210,55" fill="none" stroke="#ef4444" stroke-width="2"/>
+            
+            <!-- Liquidity Sweep Wick -->
+            <line x1="270" y1="20" x2="270" y2="120" stroke="#10b981" stroke-width="2.5"/>
+            <rect x="261" y="55" width="18" height="40" fill="#10b981"/>
+            <text x="270" y="15" fill="#10b981" font-size="12" font-weight="bold" text-anchor="middle">SWEEP! ⚡</text>
+
+            <polyline points="270,120 340,160" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+          </svg>
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-sky-400">📊 Internal vs External Liquidity</h3>
+        <p class="text-slate-300 text-sm">
+          ទីផ្សារផ្លាស់ទីជានិច្ចរវាង <strong>Internal Liquidity</strong> (FVG / OB ក្នុង Range) និង <strong>External Liquidity</strong> (Swing High / Swing Low)។
+        </p>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-2 font-mono">
+          <p>BSL ═════════════════════════ ← EXTERNAL (Swing High)</p>
+          <p class="pl-4 text-slate-500">▲  ← Internal FVG / Int High</p>
+          <p class="pl-8 text-slate-500">▼  ← Internal OB / Int Low</p>
+          <p>SSL ═════════════════════════ ← EXTERNAL (Swing Low)</p>
+        </div>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-purple-400">🧠 Liquidity Engineering</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">
+          Smart Money "ផលិត" Liquidity ដោយបង្កើត Pattern ដូចជា Double Top, Double Bottom, Trendlines ដើម្បីទាក់ទាញ Retail Traders ឱ្យដាក់ Stop Loss នៅកន្លែងតែមួយ រួចទើប Sweep យកទាំងអស់!
+        </p>
+      </div>
+    `
+  },
+
+  ms: {
+    num: "④",
+    title: "Market Structure",
+    subtitle: "HH/HL (Up), LH/LL (Down) + BOS & CHoCH",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">📊 រចនាសម្ព័ន្ធទីផ្សារ (Structure)</h3>
+        <p class="text-slate-300 text-sm">
+          ទីផ្សារមិនដែលដើរជាខ្សែត្រង់ទេ — វាបង្កើតកំពូល និងបាតជាលំដាប់លំដោយ៖
+        </p>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-emerald-950/30 border border-emerald-800/50 rounded-xl">
+            <span class="font-bold text-emerald-400">Bullish Market:</span><br> Higher High (HH) + Higher Low (HL)
+          </div>
+          <div class="p-3 bg-rose-950/30 border border-rose-800/50 rounded-xl">
+            <span class="font-bold text-rose-400">Bearish Market:</span><br> Lower High (LH) + Lower Low (LL)
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-400">BOS (Break of Structure)</span>
+            <span class="text-slate-400">ការបំបែក High/Low ក្នុងទិសដៅ Trend ចាស់ (បន្ត Trend)</span>
+          </div>
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-800">
+            <span class="font-bold text-amber-400">CHoCH (Change of Character)</span>
+            <span class="text-slate-400">សញ្ញាដំបូងនៃការផ្លាស់ប្តូរទិសដៅ Trend (Reversal)</span>
+          </div>
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">🎭 Inducement (IDM) & Fake Breaks</h3>
+        <p class="text-slate-300 text-sm">
+          មិនមែនគ្រប់ Break ទាំងអស់សុទ្ធតែជា CHoCH ឬ BOS ឡើយ! ប្រសិនបើតម្លៃបំបែក High/Low ដោយគ្រាន់តែប្រើ Wick ប៉ុន្តែមិនបាន Close Body ទេ → វាជា <strong>Liquidity Sweep / Inducement</strong> (អន្ទាក់)។
+        </p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🔄 Multi-Timeframe Alignment (HTF vs LTF)</h3>
+        <p class="text-slate-300 text-sm">
+          HTF (Daily/H4) កំណត់ Bias ចម្បង, ឯ LTF (M15/M5) ផ្តល់ CHoCH សម្រាប់កំណត់ Entry និងបង្រួម Stop Loss ឱ្យតូចបំផុត។
+        </p>
+      </div>
+    `
+  },
+
+  pd: {
+    num: "⑤",
+    title: "Premium & Discount + OTE",
+    subtitle: "តំបន់ថ្លៃ vs ថោក + Optimal Trade Entry (0.618 - 0.79)",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">💡 គោលការណ៍ Premium vs Discount</h3>
+        <p class="text-slate-300 text-sm">
+          អ្នកជំនួញឈ្លាសវៃតែងតែ <strong>ទិញនៅពេលថោក (Discount)</strong> និង <strong>លក់នៅពេលថ្លៃ (Premium)</strong>។
+        </p>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+          <svg class="chart-svg" viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+            <!-- Premium Zone -->
+            <rect x="20" y="20" width="360" height="60" fill="#ef4444" opacity="0.15"/>
+            <text x="200" y="55" font-size="13" fill="#f87171" font-weight="bold" text-anchor="middle">PREMIUM ZONE (ថ្លៃ) — លក់ (SELL)</text>
+            
+            <!-- Equilibrium -->
+            <line x1="20" y1="80" x2="380" y2="80" stroke="#f59e0b" stroke-width="2"/>
+            <text x="385" y="84" font-size="10" fill="#f59e0b">50%</text>
+
+            <!-- Discount Zone -->
+            <rect x="20" y="80" width="360" height="60" fill="#10b981" opacity="0.15"/>
+            <text x="200" y="120" font-size="13" fill="#34d399" font-weight="bold" text-anchor="middle">DISCOUNT ZONE (ថោក) — ទិញ (BUY)</text>
+          </svg>
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-sky-400">🎯 OTE Zone (0.618, 0.705, 0.79 Fibonacci)</h3>
+        <p class="text-slate-300 text-sm">
+          OTE (Optimal Trade Entry) គឺជាតំបន់ចន្លោះ Fibonacci <strong>0.618 ដល់ 0.79</strong> ដោយមានកម្រិតមាសគឺ <strong>0.705</strong>។
+        </p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🏦 Fractional Pricing & Algo Retracements</h3>
+        <p class="text-slate-300 text-sm">
+          ស្ថាប័នប្រើប្រាស់ Fibonacci Retracement មិនមែនជា Magic Number ទេ ប៉ុន្តែជាអាទិភាពនៃការប្រមូល Liquidity ក្នុង Discount មុននឹង Push តម្លៃទៅ BSL។
+        </p>
+      </div>
+    `
+  },
+
+  po3: {
+    num: "⑥",
+    title: "Power of 3 (PO3 / AMD)",
+    subtitle: "Accumulation → Manipulation → Distribution",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">💡 វដ្ត AMD ទាំង ៣</h3>
+        <p class="text-slate-300 text-sm">
+          រាល់ការបង្កើត Daily Candle ស្ថាប័នតែងតែឆ្លងកាត់ ៣ ដំណាក់កាល៖
+        </p>
+        <div class="space-y-2 text-xs">
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="font-bold text-sky-400">1. Accumulation (ប្រមូល):</span> តម្លៃដើរស្មើ (Asian Range)
+          </div>
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="font-bold text-amber-400">2. Manipulation (បោកបញ្ឆោត):</span> បោះតម្លៃប្រឆាំង Trend ពិត ដើម្បី Sweep Stop Loss (Judas Swing)
+          </div>
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="font-bold text-emerald-400">3. Distribution (បញ្ចេញ):</span> ការរត់ទៅទិសដៅពិតប្រាកដពេញមួយថ្ងៃ
+          </div>
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">⏰ Session Alignments (Asia, London, NY)</h3>
+        <p class="text-slate-300 text-sm">
+          • Asian Session = Accumulation<br>
+          • London Open = Manipulation (Judas)<br>
+          • New York Session = Distribution (Real Move)
+        </p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🏦 Daily Open (00:00 EST / NY Open)</h3>
+        <p class="text-slate-300 text-sm">
+          ការទិញខាងក្រោម Midnight Open (00:00 EST) ក្នុង Bullish day ឬលក់ខាងលើ Midnight Open ក្នុង Bearish day គឺជាការធ្វើតាម Algo PO3។
+        </p>
+      </div>
+    `
+  },
+
+  kz: {
+    num: "⑦",
+    title: "Killzones",
+    subtitle: "បង្អួចពេលវេលាសកម្មភាពខ្ពស់បំផុតរបស់ Algorithm",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">⏰ Killzones ទាំង ៤</h3>
+        <p class="text-slate-300 text-sm">
+          អ្នកមិនចាំបាច់អង្គុយមើល Chart ២៤ម៉ោងទេ! ជួញដូរតែក្នុងបង្អួច Killzone ដែល Volume ខ្ពស់បំផុត៖
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="font-bold text-sky-400">Asian KZ (00:00 - 04:00 UTC)</span>
+            <p class="text-slate-400 mt-1">កំណត់ Range / Accumulation</p>
+          </div>
+          <div class="p-3 bg-slate-950 border border-emerald-800/60 rounded-xl">
+            <span class="font-bold text-emerald-400">London Open (07:00 - 09:00 UTC) ⭐</span>
+            <p class="text-slate-400 mt-1">Primary Entry Window (High Volume)</p>
+          </div>
+          <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+            <span class="font-bold text-amber-400">London Close (10:00 - 12:00 UTC)</span>
+            <p class="text-slate-400 mt-1">Reversal ឬ Profit Taking</p>
+          </div>
+          <div class="p-3 bg-slate-950 border border-emerald-800/60 rounded-xl">
+            <span class="font-bold text-emerald-400">NY Open (13:00 - 15:00 UTC) ⭐</span>
+            <p class="text-slate-400 mt-1">Secondary Entry Window</p>
+          </div>
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">🌐 ការបំប្លែងម៉ោង UTC មកម៉ោងកម្ពុជា (Phnom Penh UTC+7)</h3>
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
+          <p>• London Open KZ: <strong>2:00 PM – 4:00 PM (រសៀល)</strong></p>
+          <p>• NY Open KZ: <strong>8:00 PM – 10:00 PM (យប់)</strong></p>
+        </div>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🧠 Algorithmic Macro Windows</h3>
+        <p class="text-slate-300 text-sm">
+          ICT Macros កើតឡើងរៀងរាល់ ២០នាទី មុន/ក្រោយ ម៉ោងគត់ (ឧ. 09:50 - 10:10 AM, 10:50 - 11:10 AM EST) ជាពេល Algorithmic injection សកម្មបំផុត។
+        </p>
+      </div>
+    `
+  },
+
+  judas: {
+    num: "⑧",
+    title: "Judas Swing",
+    subtitle: "ការផ្លាស់ទីក្លែងក្លាយនៅពេលព្រឹកដើម្បីអន្ទាក់ Retail Traders",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">🎭 Judas Swing គឺជាអ្វី?</h3>
+        <p class="text-slate-300 text-sm">
+          Judas Swing គឺជា <span class="text-amber-400 font-semibold">Fake Move</span> ដែលកើតឡើងនៅដើម Session (ភាគច្រើន London Open) ដើម្បីបោកឱ្យ Retail ចូលទិសដៅខុស រួច Sweep Stop Loss មុននឹងរត់ទៅទិសដៅពិត។
+        </p>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">🔍 របៀបកំណត់ Judas Swing</h3>
+        <p class="text-slate-300 text-sm">
+          ១. សម្គាល់ Asian High & Low<br>
+          ២. London Open បាញ់ធ្លាយ Asian High (មើលទៅដូច Breakout)<br>
+          ៣. បង្កើត Wick វែង + CHoCH លើ LTF → ចូល Sell រត់ទៅ Asian Low!
+        </p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🏛 Institutional Order Injection</h3>
+        <p class="text-slate-300 text-sm">
+          Judas គឺជាឧបករណ៍ចម្បងដែល Smart Money ប្រើបង្កើត Liquidity សម្រាប់បំពេញ Order ទំហំរាប់ពាន់លានដុល្លារ។
+        </p>
+      </div>
+    `
+  },
+
+  silver: {
+    num: "⑨",
+    title: "Silver Bullet (ICT)",
+    subtitle: "បង្អួចពេលវេលាមាស 10:00 - 11:00 AM EST (9:00 PM - 10:00 PM Cambodia)",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">💡 យុទ្ធសាស្ត្រ Silver Bullet</h3>
+        <p class="text-slate-300 text-sm">
+          Silver Bullet គឺជា Setup ដែលមានប្រូបាបឈ្នះខ្ពស់បំផុតក្នុងចន្លោះម៉ោង <strong>10:00 AM - 11:00 AM NY Time (9:00 PM - 10:00 PM ម៉ោងខ្មែរ)</strong>។
+        </p>
+        <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs space-y-1">
+          <p>១. រង់ចាំដល់ម៉ោង 9:00 PM (ម៉ោងខ្មែរ)</p>
+          <p>២. មើលការ Sweep Liquidity ឬ Break Structure</p>
+          <p>៣. ចូល Order នៅ FVG ដំបូងដែលកើតឡើង!</p>
+        </div>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">🎯 Target 1:2 Risk to Reward minimum</h3>
+        <p class="text-slate-300 text-sm">Silver Bullet ផ្តោតលើការយក 10 - 15 pips យ៉ាងលឿនក្នុង FVG ជាមួយ RRR ខ្ពស់។</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">⚡ AM vs PM Silver Bullet Windows</h3>
+        <p class="text-slate-300 text-sm">មាន ២ បង្អួច៖ 3:00-4:00 AM EST (London) និង 10:00-11:00 AM EST (NY Window)។</p>
+      </div>
+    `
+  },
+
+  dol: {
+    num: "⑩",
+    title: "Draw on Liquidity (DOL)",
+    subtitle: "គោលដៅចុងក្រោយដែលតម្លៃត្រូវបានទាញទៅរក",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-emerald-400">🎯 តើ DOL ជាអ្វី?</h3>
+        <p class="text-slate-300 text-sm">DOL គឺជាគោលដៅ (Magnet) ដែលតម្លៃកំពុងត់ទៅរក។ វាអាចជា Equal Highs (BSL), Equal Lows (SSL) ឬ HTF Unfilled FVG។</p>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">🗺️ របៀបរក DOL នៅលើ HTF</h3>
+        <p class="text-slate-300 text-sm">ពិនិត្យ Chart Daily / H4 → រកមើលកន្លែងដែលមាន Liquidity Pool ធំជាងគេ → នោះហើយជា DOL!</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🌐 Expansion Cycles towards DOL</h3>
+        <p class="text-slate-300 text-sm">នៅពេល DOL ត្រូវបានកំណត់ច្បាស់ គ្រប់ Retracements លើ LTF គ្រាន់តែជាឱកាសចូលទិញ/លក់បន្ថែមប៉ុណ្ណោះ។</p>
+      </div>
+    `
+  },
+
+  smt: {
+    num: "⑪",
+    title: "SMT Divergence",
+    subtitle: "ការប្រៀបធៀប Correlated Pairs (ឧ. EURUSD vs GBPUSD)",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-emerald-400">💡 SMT គឺជាអ្វី?</h3>
+        <p class="text-slate-300 text-sm">SMT (Smart Money Technique) កើតឡើងនៅពេល Pair ពីរដែលដើរស្របគ្នា (ឧ. EURUSD & GBPUSD) បង្ហាញសញ្ញាផ្ទុយគ្នា។</p>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">📊 ឧទាហរណ៍ SMT Divergence</h3>
+        <p class="text-slate-300 text-sm">EURUSD បង្កើត Higher High ប៉ុន្តែ GBPUSD ធ្វើមិនបាន (Lower High) → បង្ហាញថា GBP ខ្សោយជាង ឬ EUR មាន Crack ក្នុង Momentum!</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🏛 Institutional Unwillingness</h3>
+        <p class="text-slate-300 text-sm">SMT បញ្ជាក់ថាតើស្ថាប័នកំពុងគាំទ្រការឡើង/ចុះពិតប្រាកដ ឬគ្រាន់តែជាការបោកប្រាស់។</p>
+      </div>
+    `
+  },
+
+  ipda: {
+    num: "⑫",
+    title: "IPDA / Quarterly Shifts",
+    subtitle: "Interbank Price Delivery Algorithm 60-Day Lookback",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-emerald-400">📅 IPDA Lookback Periods</h3>
+        <p class="text-slate-300 text-sm">IPDA មើលទិន្នន័យថយក្រោយ <strong>20, 40, និង 60 Days</strong> ដើម្បីកំណត់ BSL និង SSL ចម្បង។</p>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">🔄 Quarterly Cycles (90-Day Shifts)</h3>
+        <p class="text-slate-300 text-sm">រៀងរាល់ ៣ខែ (ត្រីមាស) ទីផ្សារតែងតែមានការប្តូរទិសដៅធំ (Quarterly Shift)។</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🌐 Macro True Trend Delivery</h3>
+        <p class="text-slate-300 text-sm">ការយល់ដឹងពី IPDA ជួយឱ្យអ្នកមិនចាញ់បោកការស្ទុះឡើង/ចុះខ្លីៗលើ Lower Timeframes។</p>
+      </div>
+    `
+  },
+
+  confluence: {
+    num: "⑬",
+    title: "Full Confluence Model",
+    subtitle: "ការរួមបញ្ចូលប្រព័ន្ធ SMC ទាំងអស់ចូលគ្នា",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-emerald-400">📋 Checklist សំខាន់ៗ</h3>
+        <p class="text-slate-300 text-sm">កុំចូល Order ដោយសារតែមាន FVG មួយមុខ! ត្រូវមានយ៉ាងហោច ៣ confluence៖</p>
+        <ul class="list-disc pl-5 text-xs text-slate-300 space-y-1">
+          <li>១. HTF Bias ត្រូវទិសគ្នា</li>
+          <li>2. មាន Liquidity Sweep (BSL/SSL)</li>
+          <li>៣. តម្លៃស្ថិតក្នុង Killzone ម៉ោងត្រូវ</li>
+          <li>៤. មាន FVG + Order Block គាំទ្រ</li>
+        </ul>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">⭐ Scoring System (5 to 10 Points)</h3>
+        <p class="text-slate-300 text-sm">ប្រើប្រាស់ SMC Score Calculator (ក្នុងផ្នែក Tools) ដើម្បីវាយតម្លៃ Grade Setup (A+, B, C) មុនចូល Order!</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🛡️ Trade Execution Filter</h3>
+        <p class="text-slate-300 text-sm">បដិសេធ Trade ណាដែលគ្មាន Killzone ឬគ្មាន Liquidity Sweep ដាច់ខាត!</p>
+      </div>
+    `
+  },
+
+  strategy: {
+    num: "⑭",
+    title: "Complete Strategy Framework",
+    subtitle: "ផែនការជួញដូរប្រចាំថ្ងៃ: Pre-Session ដល់ Exit",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-emerald-400">🗺️ ៤ ដំណាក់កាលនៃ Daily Trading Routine</h3>
+        <p class="text-slate-300 text-sm">
+          ១. Pre-Session: មើល Daily Bias & News<br>
+          ២. Entry: រង់ចាំ Sweep + Killzone + FVG<br>
+          ៣. Risk Management: ដាក់ Risk 1% អតិបរមា<br>
+          ៤. Exit: យក TP នៅ DOL (Liquidity BSL/SSL)
+        </p>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">🛡️ Stop Loss & Partial Rules</h3>
+        <p class="text-slate-300 text-sm">កាត់ TP 50% នៅពេលតម្លៃរត់បាន 1:2 Risk-Reward ហើយសារ SL មកទល់ដើម (Break-even)។</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">📈 Scaling In & Compound Framework</h3>
+        <p class="text-slate-300 text-sm">បន្ថែម Position តែនៅពេល Order ទី១ ចំណេញ និងមាន Confirmation FVG ថ្មីលើ M5 ក្នុង direction តែមួយ។</p>
+      </div>
+    `
+  },
+
+  backtest: {
+    num: "⑮",
+    title: "Backtesting Protocol",
+    subtitle: "ការសាកល្បងយុទ្ធសាស្ត្រ 90 ថ្ងៃដើម្បីស្វែងរក Edge",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-emerald-400">📊 ហេតុអ្វីត្រូវ Backtest?</h3>
+        <p class="text-slate-300 text-sm">Backtest ជួយបង្កើតទំនុកចិត្ត! សាកល្បងយ៉ាងហោច 100 setups លើទិន្នន័យចាស់ ដើម្បីដឹងពី Win Rate & RRR ពិតប្រាកដ។</p>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">📝 Data Tracking Parameters</h3>
+        <p class="text-slate-300 text-sm">កត់ត្រា: Date, Session, Pair, Setup Type, Win/Loss, RRR, Screenshots.</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🧮 Expectancy Calculation</h3>
+        <p class="text-slate-300 text-sm">Expectancy = (Win % x Avg Win R) - (Loss % x Avg Loss R) -> ប្រសិនបើ > 0.5R = A+ Edge Strategy!</p>
+      </div>
+    `
+  },
+
+  journal: {
+    num: "⑯",
+    title: "Trade Journal & Psychology",
+    subtitle: "ការគ្រប់គ្រងផ្លូវចិត្ត និងកំណត់ត្រាជួញដូរ",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-emerald-400">📓 វិន័យ និងចិត្តសាស្ត្រជួញដូរ</h3>
+        <p class="text-slate-300 text-sm">អ្នកជួញដូរជោគជ័យមិនមែនដោយសារដឹងច្រើនទេ គឺដោយសារ <strong>គ្រប់គ្រងអារម្មណ៍ និងធ្វើតាមច្បាប់</strong> ស្ទាត់ជំនាញ!</p>
+      </div>
+    `,
+    intermediate: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-sky-400">⚠️ ជៀសវាង Revenge Trading & FOMO</h3>
+        <p class="text-slate-300 text-sm">ប្រសិនបើចាញ់ ២ដងក្នុងមួយថ្ងៃ → បិទកុំព្យូទ័រឈប់លេងភ្លាម! រក្សាមូលធនសម្រាប់ថ្ងៃស្អែក។</p>
+      </div>
+    `,
+    advanced: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-3">
+        <h3 class="text-base font-bold text-purple-400">🧠 Cognitive Performance Metrics</h3>
+        <p class="text-slate-300 text-sm">វាយតម្លៃការជួញដូរតាម Process Adherence score ជាជាងមើលតែ P&L $ ចំនួនលុយ។</p>
+      </div>
+    `
+  },
+
+  road: {
+    num: "🗺",
+    title: "SMC Roadmap",
+    subtitle: "ផ្លូវសិក្សា SMC ពីដំបូងដល់កម្រិតអាជីព",
+    beginner: `
+      <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4">
+        <h3 class="text-base font-bold text-emerald-400">🏆 មគ្គុទ្ទេសក៍សិក្សា ១៦ ជំហាន</h3>
+        <div class="space-y-2 text-xs text-slate-300">
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">1</span>
+            <span>មូលដ្ឋានគ្រឹះ: Structure (HH/HL) -> Liquidity (BSL/SSL) -> FVG & Order Block</span>
+          </div>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">2</span>
+            <span>ពេលវេលា & តំបន់: Premium/Discount -> Killzones -> PO3 (AMD)</span>
+          </div>
+          <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">3</span>
+            <span>យុទ្ធសាស្ត្រអាជីព: Silver Bullet -> SMT -> Full Confluence & Risk Plan</span>
+          </div>
+        </div>
+      </div>
+    `,
+    intermediate: ``,
+    advanced: ``
+  },
+
+  tools: {
+    num: "🧮",
+    title: "SMC Interactive Trading Tools",
+    subtitle: "គណនំហានិភ័យ (Risk Calculator), វាយតម្លៃ Setup (Confluence) និងកត់ត្រា Trade Journal",
+    beginner: `
+      <div class="space-y-6">
+        
+        <!-- Tool 1: Risk & Position Size Calculator -->
+        <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4 shadow-xl">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-800">
+            <div class="p-2 bg-emerald-950 text-emerald-400 rounded-xl border border-emerald-800">
+              <i data-lucide="calculator" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-base">១. ឧបករណ៍គណនារំហូរដើមទុន & Risk Size</h3>
+              <p class="text-xs text-slate-400">Position Size & Lot Calculator</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">ទំហំគណនី ($ Account Balance)</label>
+              <input type="number" id="calc-balance" value="10000" oninput="calculateRisk()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">ភាគរយហានិភ័យ (Risk %)</label>
+              <input type="number" id="calc-risk-pct" value="1" step="0.1" oninput="calculateRisk()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">ប្រវែង Stop Loss (Pips)</label>
+              <input type="number" id="calc-sl-pips" value="15" oninput="calculateRisk()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <span class="text-[11px] text-slate-400 block">ចំនួនលុយប្រឈម ($ Risk)</span>
+              <span id="res-risk-amount" class="text-base font-bold text-rose-400">$100.00</span>
+            </div>
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl">
+              <span class="text-[11px] text-slate-400 block">ទំហំ Lot ទូទៅ (Standard Lot)</span>
+              <span id="res-lot-size" class="text-base font-bold text-emerald-400">0.67 Lots</span>
+            </div>
+            <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl col-span-2 sm:col-span-1">
+              <span class="text-[11px] text-slate-400 block">អនុសាសន៍</span>
+              <span class="text-xs font-medium text-slate-300">កុំប្រថុយលើសពី 1-2% ក្នុងមួយ Trade!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 2: Confluence Score Evaluator -->
+        <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4 shadow-xl">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-800">
+            <div class="p-2 bg-amber-950 text-amber-400 rounded-xl border border-amber-800">
+              <i data-lucide="check-square" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-base">២. ឧបករណ៍វាយតម្លៃ SMC Confluence Score</h3>
+              <p class="text-xs text-slate-400">ពិនិត្យលក្ខខណ្ឌមុននឹងចុច Entry Order</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" id="confluence-checklist">
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+              <input type="checkbox" value="2" onchange="updateConfluenceScore()" class="conf-check rounded accent-emerald-500 w-4 h-4">
+              <span>HTF Bias ច្បាស់លាស់ (Daily / H4) (+2pts)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+              <input type="checkbox" value="2" onchange="updateConfluenceScore()" class="conf-check rounded accent-emerald-500 w-4 h-4">
+              <span>មាន Liquidity Sweep / Stop Hunt (+2pts)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+              <input type="checkbox" value="2" onchange="updateConfluenceScore()" class="conf-check rounded accent-emerald-500 w-4 h-4">
+              <span>ស្ថិតក្នុង Killzone (London / NY) (+2pts)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+              <input type="checkbox" value="1" onchange="updateConfluenceScore()" class="conf-check rounded accent-emerald-500 w-4 h-4">
+              <span>ស្ថិតក្នុង Premium/Discount + OTE Zone (+1pt)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+              <input type="checkbox" value="1" onchange="updateConfluenceScore()" class="conf-check rounded accent-emerald-500 w-4 h-4">
+              <span>មាន FVG ឬ Order Block ស្អាត (+1pt)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 rounded-xl border border-slate-800 cursor-pointer hover:bg-slate-900">
+              <input type="checkbox" value="2" onchange="updateConfluenceScore()" class="conf-check rounded accent-emerald-500 w-4 h-4">
+              <span>មាន SMT Divergence Confirmation (+2pts)</span>
+            </label>
+          </div>
+
+          <div class="p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="text-xs text-slate-400">ពិន្ទុ Confluence សរុប:</span>
+              <div id="conf-score-text" class="text-xl font-bold text-amber-400">0 / 10</div>
+            </div>
+            <div id="conf-status-badge" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-400 font-bold">
+              មិនទាន់គ្រប់គ្រាន់ (C Grade)
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool 3: Trade Logger / Journal -->
+        <div class="bg-darkCard border border-borderDark rounded-2xl p-5 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <div class="p-2 bg-sky-950 text-sky-400 rounded-xl border border-sky-800">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-base">៣. កត់ត្រា Trade Journal (Local Storage)</h3>
+                <p class="text-xs text-slate-400">រក្សាទុកប្រវត្តិនៃការជួញដូររបស់អ្នក</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Form -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <input type="text" id="log-pair" placeholder="Pair (ឧ. EURUSD)" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+            <select id="log-type" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+              <option value="BUY">BUY 🟢</option>
+              <option value="SELL">SELL 🔴</option>
+            </select>
+            <input type="text" id="log-rrr" placeholder="RRR (ឧ. 1:3)" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+            <select id="log-result" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+              <option value="WIN">WIN ✅</option>
+              <option value="LOSS">LOSS ❌</option>
+              <option value="BE">BREAKEVEN ⚖️</option>
+            </select>
+          </div>
+          <button onclick="addTradeLog()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-black font-bold rounded-xl text-xs transition flex items-center justify-center gap-1">
+            <i data-lucide="plus" class="w-4 h-4"></i> បន្ថែមការកត់ត្រា Trade
+          </button>
+
+          <!-- Logs List -->
+          <div id="logs-container" class="space-y-2 pt-2 max-h-60 overflow-y-auto">
+            <!-- Dynamic logs -->
+          </div>
+        </div>
+
+      </div>
+    `,
+    intermediate: ``,
+    advanced: ``
+  }
+};
+
+// Render active topic content
+function renderCurrentTopic() {
+  const data = smcTopicsData[currentTopicKey];
+  if (!data) return;
+
+  // Update Header Banner
+  document.getElementById('topic-badge-num').innerText = `Topic ${data.num}`;
+  document.getElementById('current-topic-title').innerHTML = `${data.title}`;
+  document.getElementById('current-topic-subtitle').innerText = data.subtitle;
+
+  // Toggle Level tabs visibility (Hide for Roadmap & Tools)
+  const tabsContainer = document.getElementById('level-tabs-container');
+  if (currentTopicKey === 'road' || currentTopicKey === 'tools') {
+    tabsContainer.classList.add('hidden');
+  } else {
+    tabsContainer.classList.remove('hidden');
+  }
+
+  // Update Active Level Tab Styles
+  ['beginner', 'intermediate', 'advanced'].forEach(lvl => {
+    const btn = document.getElementById(`tab-lvl-${lvl}`);
+    if (btn) {
+      if (lvl === currentLevel) {
+        btn.className = "lvl-btn py-2 text-xs sm:text-sm font-semibold rounded-lg transition flex items-center justify-center gap-1.5 bg-emerald-950 text-emerald-400 border border-emerald-700/50 shadow";
+      } else {
+        btn.className = "lvl-btn py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5";
+      }
+    }
+  });
+
+  // Render HTML Content
+  const contentDisplay = document.getElementById('main-content-display');
+  const levelContent = data[currentLevel] || data['beginner'];
+  contentDisplay.innerHTML = levelContent;
+
+  // Highlight active buttons in navigation
+  updateNavHighlights();
+  updateBookmarkButtonUI();
+
+  // Re-initialize Lucide Icons for dynamic content
+  if (window.lucide) lucide.createIcons();
+
+  // Initialize Calculator if on tools topic
+  if (currentTopicKey === 'tools') {
+    calculateRisk();
+    renderTradeLogs();
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Navigation highlight helper
+function updateNavHighlights() {
+  document.querySelectorAll('.topic-nav-btn').forEach(btn => {
+    btn.classList.remove('bg-emerald-900/60', 'text-emerald-400', 'border-emerald-500');
+  });
+  document.querySelectorAll('.side-nav-item').forEach(btn => {
+    btn.classList.remove('bg-emerald-950/60', 'text-emerald-400', 'font-bold');
+  });
+
+  const activeNavBtn = document.getElementById(`nav-btn-${currentTopicKey}`);
+  if (activeNavBtn) {
+    activeNavBtn.classList.add('bg-emerald-900/60', 'text-emerald-400', 'border-emerald-500');
+  }
+
+  const activeSideBtn = document.getElementById(`side-${currentTopicKey}`);
+  if (activeSideBtn) {
+    activeSideBtn.classList.add('bg-emerald-950/60', 'text-emerald-400', 'font-bold');
+  }
+}
+
+// Switch Topic Function
+function switchTopic(topicKey) {
+  currentTopicKey = topicKey;
+  renderCurrentTopic();
+}
+
+// Select Difficulty Level
+function selectLevel(level) {
+  currentLevel = level;
+  renderCurrentTopic();
+}
+
+// Bookmarking logic
+function updateBookmarkButtonUI() {
+  const isSaved = savedBookmarks.includes(currentTopicKey);
+  const btnText = document.getElementById('bookmark-btn-text');
+  const icon = document.getElementById('bookmark-icon');
+  const badge = document.getElementById('bookmark-count-badge');
+
+  if (btnText && icon) {
+    if (isSaved) {
+      btnText.innerText = "បានរក្សាទុក";
+      icon.classList.add('fill-amber-400');
+    } else {
+      btnText.innerText = "រក្សាទុកមេរៀន";
+      icon.classList.remove('fill-amber-400');
+    }
+  }
+
+  if (badge) {
+    if (savedBookmarks.length > 0) {
+      badge.innerText = savedBookmarks.length;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+}
+
+function toggleBookmarkCurrent() {
+  const index = savedBookmarks.indexOf(currentTopicKey);
+  if (index > -1) {
+    savedBookmarks.splice(index, 1);
+  } else {
+    savedBookmarks.push(currentTopicKey);
+  }
+  localStorage.setItem('smc_bookmarks', JSON.stringify(savedBookmarks));
+  updateBookmarkButtonUI();
+}
+
+// Modals toggles
+function toggleSearchModal() {
+  const modal = document.getElementById('search-modal');
+  modal.classList.toggle('hidden');
+  if (!modal.classList.contains('hidden')) {
+    document.getElementById('search-input').focus();
+  }
+}
+
+function toggleBookmarksModal() {
+  const modal = document.getElementById('bookmarks-modal');
+  modal.classList.toggle('hidden');
+  if (!modal.classList.contains('hidden')) {
+    renderBookmarksList();
+  }
+}
+
+function renderBookmarksList() {
+  const container = document.getElementById('bookmarks-list');
+  if (savedBookmarks.length === 0) {
+    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">គ្មានមេរៀនដែលបានរក្សាទុកនៅឡើយទេ</p>`;
+    return;
+  }
+
+  let html = '';
+  savedBookmarks.forEach(key => {
+    const item = smcTopicsData[key];
+    if (item) {
+      html += `
+        <div onclick="switchTopic('${key}'); toggleBookmarksModal();" class="p-3 bg-slate-950 border border-slate-800 hover:border-emerald-500 rounded-xl cursor-pointer transition flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold text-emerald-400">${item.num} ${item.title}</span>
+            <p class="text-[11px] text-slate-400">${item.subtitle}</p>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </div>
+      `;
+    }
+  });
+  container.innerHTML = html;
+  if (window.lucide) lucide.createIcons();
+}
+
+// Search Logic
+function handleSearch() {
+  const query = document.getElementById('search-input').value.toLowerCase().trim();
+  const resultsContainer = document.getElementById('search-results');
+
+  if (!query) {
+    resultsContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">បញ្ចូលពាក្យគន្លឹះដើម្បីស្វែងរកមេរៀន...</p>`;
+    return;
+  }
+
+  let matches = [];
+  Object.keys(smcTopicsData).forEach(key => {
+    const topic = smcTopicsData[key];
+    const matchTitle = topic.title.toLowerCase().includes(query);
+    const matchSub = topic.subtitle.toLowerCase().includes(query);
+    if (matchTitle || matchSub) {
+      matches.push({ key, topic });
+    }
+  });
+
+  if (matches.length === 0) {
+    resultsContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">រកមិនឃើញមេរៀនស្របនឹងពាក្យស្វែងរកឡើយ</p>`;
+    return;
+  }
+
+  let html = '';
+  matches.forEach(m => {
+    html += `
+      <div onclick="switchTopic('${m.key}'); toggleSearchModal();" class="p-3 bg-slate-950 border border-slate-800 hover:border-emerald-500 rounded-xl cursor-pointer transition flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold text-emerald-400">${m.topic.num} ${m.topic.title}</span>
+          <p class="text-[11px] text-slate-400">${m.topic.subtitle}</p>
+        </div>
+        <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-400"></i>
+      </div>
+    `;
+  });
+  resultsContainer.innerHTML = html;
+  if (window.lucide) lucide.createIcons();
+}
+
+// Risk Calculator logic
+function calculateRisk() {
+  const balance = parseFloat(document.getElementById('calc-balance')?.value) || 0;
+  const riskPct = parseFloat(document.getElementById('calc-risk-pct')?.value) || 0;
+  const slPips = parseFloat(document.getElementById('calc-sl-pips')?.value) || 1;
+
+  const riskAmount = (balance * (riskPct / 100));
+  // Standard Pip value estimate ($10 per pip per std lot on EURUSD)
+  const lotSize = (riskAmount / (slPips * 10));
+
+  const resRisk = document.getElementById('res-risk-amount');
+  const resLot = document.getElementById('res-lot-size');
+
+  if (resRisk) resRisk.innerText = `$${riskAmount.toFixed(2)}`;
+  if (resLot) resLot.innerText = `${lotSize.toFixed(2)} Lots`;
+}
+
+// Confluence Score logic
+function updateConfluenceScore() {
+  const checkboxes = document.querySelectorAll('.conf-check');
+  let score = 0;
+  checkboxes.forEach(cb => {
+    if (cb.checked) score += parseInt(cb.value);
+  });
+
+  const scoreText = document.getElementById('conf-score-text');
+  const badge = document.getElementById('conf-status-badge');
+
+  if (scoreText) scoreText.innerText = `${score} / 10`;
+
+  if (badge) {
+    if (score >= 8) {
+      badge.innerText = "A+ Valid Setup ⭐⭐⭐ (រៀបចំចូល Order)";
+      badge.className = "px-3 py-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-700 text-xs font-bold";
+    } else if (score >= 5) {
+      badge.innerText = "B Grade Setup ⭐ (គួរប្រុងប្រយ័ត្ន)";
+      badge.className = "px-3 py-1 rounded-lg bg-amber-950 text-amber-400 border border-amber-700 text-xs font-bold";
+    } else {
+      badge.innerText = "C Grade - មិនទាន់គ្រប់គ្រាន់ ❌ (កុំទាន់ចូល!)";
+      badge.className = "px-3 py-1 rounded-lg bg-rose-950 text-rose-400 border border-rose-700 text-xs font-bold";
+    }
+  }
+}
+
+// Journal / Trade Logger
+function addTradeLog() {
+  const pair = document.getElementById('log-pair')?.value.trim() || 'EURUSD';
+  const type = document.getElementById('log-type')?.value || 'BUY';
+  const rrr = document.getElementById('log-rrr')?.value.trim() || '1:2';
+  const result = document.getElementById('log-result')?.value || 'WIN';
+
+  const newLog = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString(),
+    pair, type, rrr, result
+  };
+
+  tradeLogs.unshift(newLog);
+  localStorage.setItem('smc_tradelogs', JSON.stringify(tradeLogs));
+  renderTradeLogs();
+
+  // Clear input
+  if (document.getElementById('log-pair')) document.getElementById('log-pair').value = '';
+}
+
+function renderTradeLogs() {
+  const container = document.getElementById('logs-container');
+  if (!container) return;
+
+  if (tradeLogs.length === 0) {
+    container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">គ្មានកំណត់ត្រាជួញដូរនៅឡើយទេ</p>`;
+    return;
+  }
+
+  let html = '';
+  tradeLogs.forEach(log => {
+    const isWin = log.result === 'WIN';
+    const isLoss = log.result === 'LOSS';
+    const badgeColor = isWin ? 'bg-emerald-950 text-emerald-400 border-emerald-800' : isLoss ? 'bg-rose-950 text-rose-400 border-rose-800' : 'bg-slate-800 text-slate-300 border-slate-700';
+
+    html += `
+      <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-white">${log.pair}</span>
+          <span class="${log.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'} font-semibold">${log.type}</span>
+          <span class="text-slate-500">RRR ${log.rrr}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded border ${badgeColor} text-[10px] font-bold">${log.result}</span>
+          <button onclick="deleteTradeLog(${log.id})" class="text-slate-600 hover:text-rose-400 p-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  if (window.lucide) lucide.createIcons();
+}
+
+function deleteTradeLog(id) {
+  tradeLogs = tradeLogs.filter(l => l.id !== id);
+  localStorage.setItem('smc_tradelogs', JSON.stringify(tradeLogs));
+  renderTradeLogs();
+}
+
+// Initial application load
+window.addEventListener('DOMContentLoaded', () => {
+  renderCurrentTopic();
+  updateBookmarkButtonUI();
+});
+</script>
+</body>
+</html>
